@@ -1,12 +1,34 @@
+namespace SpriteKind {
+    export const foxfromright = SpriteKind.create()
+    export const foxfromtop = SpriteKind.create()
+    export const foxfrombottom = SpriteKind.create()
+    export const foxfromleft = SpriteKind.create()
+}
 namespace StatusBarKind {
     export const stamina = StatusBarKind.create()
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.foxfrombottom, function (sprite9, otherSprite9) {
+    info.changeLifeBy(-1)
+    pause(500)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.foxfromright, function (sprite7, otherSprite7) {
+    info.changeLifeBy(-1)
+    pause(500)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.foxfromleft, function (sprite6, otherSprite6) {
+    info.changeScoreBy(1)
+    fox_from_left.setPosition(0, 0)
+})
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (statusbar.value == 10) {
-        controller.moveSprite(hero)
+        controller.moveSprite(hero, 150, 150)
         pause(1000)
         statusbar.value = 0
     }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.foxfromleft, function (sprite, otherSprite) {
+    info.changeLifeBy(-1)
+    pause(500)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(swingingSword)) {
@@ -35,10 +57,42 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         swingingSword = false
     }
 })
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.foxfromright, function (sprite3, otherSprite3) {
+    info.changeScoreBy(1)
+    fox_from_right.setPosition(0, 0)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.foxfromtop, function (sprite2, otherSprite2) {
+    fox_from_top.setPosition(0, 0)
+    info.changeScoreBy(1)
+})
+info.onLifeZero(function () {
+    sprites.destroy(hero, effects.none, 500)
+    game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.foxfrombottom, function (sprite4, otherSprite4) {
+    fox_from_bottom.setPosition(0, 0)
+    info.changeScoreBy(1)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.foxfromtop, function (sprite5, otherSprite5) {
+    info.changeLifeBy(-1)
+    pause(500)
+})
+info.onScore(500, function () {
+    game.gameOver(true)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite8, otherSprite8) {
+    info.changeLifeBy(1)
+    bigpot.setPosition(0, 0)
+})
 let swingingSword = false
 let sword: Sprite = null
 let statusbar: StatusBarSprite = null
 let hero: Sprite = null
+let fox_from_left: Sprite = null
+let fox_from_bottom: Sprite = null
+let fox_from_top: Sprite = null
+let fox_from_right: Sprite = null
+let bigpot: Sprite = null
 scene.setBackgroundImage(img`
     ffffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffffffffffffffffffffffffffffffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddd
     ffffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffffffffffffffffffffffffffffffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddd
@@ -161,7 +215,27 @@ scene.setBackgroundImage(img`
     fdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddfffffdddddffff
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     `)
-let fox_from_right = sprites.create(img`
+info.setScore(0)
+bigpot = sprites.create(img`
+    . . . . . . . . . . . . . . . . 
+    . . . . . . . . . . . . . . . . 
+    . . . . f . . . . . . f . . . . 
+    . . . f 4 f . . . . f 2 f . . . 
+    . f f 4 4 4 f . . f 2 2 2 f . . 
+    . f 4 4 2 2 2 f f 2 2 2 2 2 f . 
+    f 4 4 2 2 2 2 2 4 4 4 2 2 2 2 f 
+    f 2 2 2 2 2 2 4 4 4 2 2 2 2 2 f 
+    . f 2 2 2 2 2 2 2 2 2 2 2 2 2 f 
+    . . f 2 2 2 2 2 2 2 2 2 2 2 f . 
+    . . . f 2 2 2 4 2 2 2 2 2 f . . 
+    . . . f 2 2 4 4 2 2 2 2 2 f . . 
+    . . . . f 2 4 2 2 2 2 2 f . . . 
+    . . . . . f 2 2 2 2 2 f . . . . 
+    . . . . . . f 2 2 2 f . . . . . 
+    . . . . . . f f f f f . . . . . 
+    `, SpriteKind.Food)
+bigpot.setPosition(0, 0)
+fox_from_right = sprites.create(img`
     . . . 1 1 4 4 4 4 4 4 . . . . . 
     . . 1 1 1 4 4 4 4 4 4 4 . . . . 
     . . 1 1 4 4 4 4 4 4 4 4 4 4 4 4 
@@ -178,8 +252,8 @@ let fox_from_right = sprites.create(img`
     . . 1 1 4 4 4 4 4 4 4 4 4 4 4 4 
     . . 1 1 1 4 4 4 4 4 4 4 . . . . 
     . . . 1 1 4 4 4 4 4 4 . . . . . 
-    `, SpriteKind.Enemy)
-let fox_from_top = sprites.create(img`
+    `, SpriteKind.foxfromright)
+fox_from_top = sprites.create(img`
     . . 4 4 . . . . . . . . 4 4 . . 
     . . 4 4 4 . . . . . . 4 4 4 . . 
     . . 4 f 4 . . . . . . 4 f 4 . . 
@@ -196,8 +270,8 @@ let fox_from_top = sprites.create(img`
     . 1 1 1 1 1 4 4 4 4 1 1 1 1 1 . 
     . . . . 1 1 4 f f 4 1 1 . . . . 
     . . . . 1 1 4 f f 4 1 1 . . . . 
-    `, SpriteKind.Enemy)
-let fox_from_bottom = sprites.create(img`
+    `, SpriteKind.foxfromtop)
+fox_from_bottom = sprites.create(img`
     . . . . 1 1 4 f f 4 1 1 . . . . 
     . . . . 1 1 4 f f 4 1 1 . . . . 
     . 1 1 1 1 1 4 4 4 4 1 1 1 1 1 . 
@@ -214,8 +288,8 @@ let fox_from_bottom = sprites.create(img`
     . . 4 f 4 . . . . . . 4 f 4 . . 
     . . 4 4 4 . . . . . . 4 4 4 . . 
     . . 4 4 . . . . . . . . 4 4 . . 
-    `, SpriteKind.Enemy)
-let fox_from_left = sprites.create(img`
+    `, SpriteKind.foxfrombottom)
+fox_from_left = sprites.create(img`
     . . . . . 4 4 4 4 4 4 1 1 . . . 
     . . . . 4 4 4 4 4 4 4 1 1 1 . . 
     4 4 4 4 4 4 4 4 4 4 4 4 1 1 . . 
@@ -232,7 +306,7 @@ let fox_from_left = sprites.create(img`
     4 4 4 4 4 4 4 4 4 4 4 4 1 1 . . 
     . . . . 4 4 4 4 4 4 4 1 1 1 . . 
     . . . . . 4 4 4 4 4 4 1 1 . . . 
-    `, SpriteKind.Enemy)
+    `, SpriteKind.foxfromleft)
 hero = sprites.create(img`
     . . . 5 5 5 5 5 5 5 5 5 5 . . . 
     . . 5 5 5 5 5 5 5 5 5 5 5 5 . . 
@@ -251,7 +325,12 @@ hero = sprites.create(img`
     . . 5 5 5 5 5 5 5 5 5 5 5 5 . . 
     . . . 5 5 5 5 5 5 5 5 5 5 . . . 
     `, SpriteKind.Player)
+fox_from_top.setPosition(0, 0)
+fox_from_right.setPosition(0, 0)
+fox_from_left.setPosition(0, 0)
+fox_from_bottom.setPosition(0, 0)
 hero.setStayInScreen(true)
+info.setLife(3)
 statusbar = statusbars.create(20, 4, StatusBarKind.stamina)
 statusbar.max = 10
 controller.moveSprite(hero, 70, 70)
@@ -289,26 +368,29 @@ game.onUpdate(function () {
         sword.x = hero.x
     }
 })
-game.onUpdateInterval(1000, function () {
-    statusbar.value += 1
+game.onUpdateInterval(25000, function () {
+    bigpot.setPosition(randint(16, 144), randint(16, 104))
 })
-game.onUpdateInterval(1500, function () {
-    if (true) {
-        fox_from_top.setPosition(0, 0)
-        fox_from_top.setVelocity(0, 100)
-    }
-    if (true) {
-        fox_from_left.setPosition(0, 0)
+game.onUpdateInterval(1750, function () {
+    if (randint(1, 4) == 1) {
+        fox_from_left.setPosition(0, randint(10, 110))
         fox_from_left.setVelocity(100, 0)
-        if (true) {
-            fox_from_bottom.setPosition(0, 0)
-            fox_from_bottom.setVelocity(0, -100)
-        }
     }
-    if (true) {
+    if (randint(1, 4) == 2) {
         fox_from_right.setPosition(160, randint(20, 100))
         fox_from_right.setVelocity(-100, 0)
     }
+    if (randint(1, 4) == 3) {
+        fox_from_bottom.setPosition(randint(10, 110), 120)
+        fox_from_bottom.setVelocity(0, -100)
+    }
+    if (randint(1, 4) == 4) {
+        fox_from_top.setPosition(randint(10, 110), 0)
+        fox_from_top.setVelocity(0, 100)
+    }
+})
+game.onUpdateInterval(1000, function () {
+    statusbar.value += 1
 })
 game.onUpdateInterval(4, function () {
 	
@@ -317,15 +399,4 @@ forever(function () {
     if (statusbar.value < 10) {
         controller.moveSprite(hero, 70, 70)
     }
-})
-forever(function () {
-    if (swingingSword.overlapsWith(fox_from_right)) {
-        sprites.destroy(fox_from_right)
-    }
-})
-game.onUpdateInterval(500, function () {
-	
-})
-game.onUpdateInterval(500, function () {
-	
 })
